@@ -21,35 +21,55 @@ sp = spotipy.Spotify(auth=token)
 access_token = token
 
 
+def artist_search():
+    artist_name = str(input("Please Enter the artists name you want to see"))
 
-track_uri = "spotify:track:1BpKJw4RZxaFB88NE5uxXf"
-sp.add_to_queue(track_uri)
+    results = sp.search(q=artist_name, type='artist')
+    items = results['artists']['items']
 
-
-
-
-artist_name = str(input("Please Enter the artists name you want to see"))
-
-results = sp.search(q=artist_name, type='artist')
-items = results['artists']['items']
-
-if len(items) > 0:
-    artist = items[0]
-    print(f"Artist: {artist['name']}")
-    print(f"URI: {artist['uri']}")
-else:
-    print(f"No artist found with name '{artist_name}'.")
+    if len(items) > 0:
+        artist = items[0]
+        print(f"Artist: {artist['name']}")
+        print(f"URI: {artist['uri']}")
+    else:
+        print(f"No artist found with name '{artist_name}'.")
 
 
-results = sp.artist_top_tracks((f"{artist['uri']}"))
+    results = sp.artist_top_tracks((f"{artist['uri']}"))
 
-user_choice = int(input("How many top songs do you want to see? "))
+    user_choice = int(input("How many top songs do you want to see? "))
 
-for track in results['tracks'][:user_choice]:
-    print('track    : ' + track['name'])
-    print('audio    : ' + track['preview_url'])
-    print('cover art: ' + track['album']['images'][0]['url'])
-    print()
+    for track in results['tracks'][:user_choice]:
+        print('track    : ' + track['name'])
+        print('audio    : ' + track['preview_url'])
+        print('cover art: ' + track['album']['images'][0]['url'])
+        print()
 
 
-    
+def song_search():
+    # Search for the artist
+    search_query = str(input("Please Enter the song you want to see: "))
+    search_type = 'track'
+    search_url = f'https://api.spotify.com/v1/search?q={search_query}&type={search_type}'
+    response = requests.get(search_url, headers={'Authorization': 'Bearer ' + token})
+    response_json = response.json()
+
+    # Get the URI
+    track_uri = response_json['tracks']['items'][0]['uri']
+    print(track_uri)
+
+    # Get the name
+    sp.add_to_queue(track_uri)
+    sp.next_track()
+    sp.start_playback()
+
+
+menu = input("Please select an option:\n1. Search for an artist\n2. Search for a song\n3.")
+if menu == "1":
+    artist_search()
+if menu == "2":
+    song_search()
+elif menu == "3":
+    pass
+elif menu == "5":
+    pass
